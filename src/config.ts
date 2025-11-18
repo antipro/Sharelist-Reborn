@@ -1,3 +1,6 @@
+// Fix: Add reference to vite/client types to resolve 'env' property on ImportMeta
+/// <reference types="vite/client" />
+
 export const config = {
   // Defaults to true if not explicitly set to 'false'
   useMock: import.meta.env.VITE_USE_MOCK !== 'false',

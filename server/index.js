@@ -6,6 +6,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -36,6 +37,17 @@ try {
   console.error('Failed to create database pool', err);
 }
 
+// Email Transporter Configuration
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
 // --- HTTP ENDPOINTS (Auth) ---
 
 // 1. Send Verification Code
@@ -47,19 +59,39 @@ app.post('/api/auth/code', async (req, res) => {
   const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours
 
   try {
-    // In a real app, you would send this via email (SMTP/SendGrid)
-    console.log(`[AUTH] Code for ${email}: ${code}`);
-    
+    // Store code in database
     await pool.execute(
       `INSERT INTO verify_codes (email, code, expires_at) VALUES (?, ?, ?) 
        ON DUPLICATE KEY UPDATE code = ?, expires_at = ?`,
       [email, code, expiresAt, code, expiresAt]
     );
     
-    res.json({ message: 'Code sent', code }); // Returning code for demo purposes
+    // Send Email
+    const mailOptions = {
+      from: process.env.SMTP_FROM || '"Sharelist" <no-reply@sharelist.app>',
+      to: email,
+      subject: 'Your Verification Code - Sharelist',
+      text: `Your verification code is: ${code}. It expires in 2 hours.`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Verification Code</h2>
+          <p>Use the code below to verify your account:</p>
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
+            <strong style="font-size: 24px; letter-spacing: 4px; color: #2563eb;">${code}</strong>
+          </div>
+          <p style="color: #666; font-size: 14px;">This code expires in 2 hours.</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`[AUTH] Verification email sent to ${email}`);
+    
+    // Secure response: Do NOT return the code
+    res.json({ message: 'Verification code sent to your email.' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
+    console.error('Auth flow error:', err);
+    res.status(500).json({ error: 'Failed to send verification code. Please check server logs.' });
   }
 });
 
@@ -203,7 +235,6 @@ io.on('connection', (socket) => {
       );
       
       // Get items for all user projects
-      // Simplification: Fetch all items belonging to user's projects
       const [items] = await pool.execute(
         `SELECT i.* FROM items i 
          JOIN projects p ON i.project_id = p.id 
@@ -233,7 +264,6 @@ io.on('connection', (socket) => {
         [newProject.id, newProject.user_id, newProject.name, newProject.created_at]
       );
       
-      // Normalize for client (remove snake_case if needed, or handle in client)
       const clientProject = {
         id: newProject.id,
         name: newProject.name,
@@ -303,7 +333,6 @@ io.on('connection', (socket) => {
       const newStatus = !rows[0].completed;
       await pool.execute('UPDATE items SET completed = ? WHERE id = ?', [newStatus, data.itemId]);
       
-      // Fetch updated item to broadcast
       const [updatedRows] = await pool.execute('SELECT * FROM items WHERE id = ?', [data.itemId]);
       const item = updatedRows[0];
 
@@ -324,7 +353,6 @@ io.on('connection', (socket) => {
     if (!currentUserId) return;
 
     try {
-      // Simple delete with ownership check
       await pool.execute(
         `DELETE i FROM items i 
          JOIN projects p ON i.project_id = p.id 
@@ -343,7 +371,6 @@ io.on('connection', (socket) => {
     const item = data.item;
 
     try {
-       // Verify project exists and belongs to user
        const [projects] = await pool.execute(
         'SELECT id FROM projects WHERE id = ? AND user_id = ?',
         [item.projectId, currentUserId]

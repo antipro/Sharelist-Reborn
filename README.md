@@ -79,5 +79,22 @@ The project includes a full Node.js backend in `server/`.
 1. Navigate to the server directory: `cd server`
 2. Install dependencies: `npm install`
 3. Setup MySQL database using `db/schema.sql`
-4. Create a `.env` file in `server/` with DB credentials.
+4. Create a `.env` file in `server/` with DB credentials and SMTP settings:
+
+   ```env
+   DB_HOST=localhost
+   DB_USER=root
+   DB_PASSWORD=password
+   DB_NAME=sharelist
+   JWT_SECRET=supersecret
+   
+   # SMTP Configuration (Required for emails)
+   SMTP_HOST=smtp.example.com
+   SMTP_PORT=587
+   SMTP_USER=user@example.com
+   SMTP_PASS=password
+   SMTP_SECURE=false
+   SMTP_FROM="Sharelist <noreply@sharelist.app>"
+   ```
+
 5. Run server: `npm start`
