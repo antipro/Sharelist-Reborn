@@ -1,0 +1,16 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#3b82f6"/>
+  <g fill="white">
+    <!-- First list item with checkmark -->
+    <rect x="64" y="120" width="384" height="16" rx="8"/>
+    <path d="M 96 128 L 120 152 L 160 112" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Second list item with checkmark -->
+    <rect x="64" y="248" width="384" height="16" rx="8"/>
+    <path d="M 96 256 L 120 280 L 160 240" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Third list item (unchecked) -->
+    <rect x="64" y="376" width="384" height="16" rx="8"/>
+    <circle cx="108" cy="384" r="20" stroke="white" stroke-width="8" fill="none"/>
+  </g>
+</svg>
