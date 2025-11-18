@@ -32,6 +32,29 @@ Sharelist is designed as a "desktop-class" web application featuring a command-d
 - **`context/`**: React Context providers for global state (Auth, Socket, App Data).
 - **`services/`**: `mockService.ts` contains the core backend logic.
 
+## 🔧 Configuration
+
+The application can run in two modes: **Mock Mode** (Browser-only) or **Real Mode** (Connected to Node.js Backend).
+
+### Switching to Real Server
+To connect the client to the local Node.js server:
+
+1. Create a file named `.env` in the root directory.
+2. Add the following configuration:
+
+```env
+# Disable mock service
+VITE_USE_MOCK=false
+
+# Point to your local server
+VITE_API_URL=http://localhost:3001
+```
+
+3. Restart the development server:
+```bash
+npm run dev
+```
+
 ## 🎮 How to Run
 
 ### Web
@@ -52,4 +75,9 @@ npm run tauri build
 ```
 
 ### Server (Optional)
-The project includes a full Node.js backend in `server/`. To use it, update `SocketContext` to point to your local server instead of `MockSocket`.
+The project includes a full Node.js backend in `server/`.
+1. Navigate to the server directory: `cd server`
+2. Install dependencies: `npm install`
+3. Setup MySQL database using `db/schema.sql`
+4. Create a `.env` file in `server/` with DB credentials.
+5. Run server: `npm start`
