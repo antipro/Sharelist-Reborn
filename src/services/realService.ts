@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { User, AuthResponse } from '../types';
+import { User, AuthResponse } from '../../types';
 import { config } from '../config';
 
 const API_URL = config.apiUrl;

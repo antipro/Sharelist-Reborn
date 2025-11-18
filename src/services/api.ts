@@ -1,4 +1,4 @@
-import { api as mockApi, MockSocket } from './mockService';
+import { api as mockApi, MockSocket } from '../../services/mockService';
 import { api as realApi, createSocket as createRealSocket } from './realService';
 import { config } from '../config';
 

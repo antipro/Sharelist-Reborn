@@ -184,6 +184,13 @@ export class MockSocket {
     this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
   }
 
+  // Mirror Socket.io client API: allow explicit disconnect
+  disconnect() {
+    this.listeners = {};
+    this.userId = null;
+    console.log('[MockSocket] Disconnected');
+  }
+
   emit(event: string, data: any) {
     // Simulate Server Logic
     setTimeout(() => this.handleServerLogic(event, data), 100);
